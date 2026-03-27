@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 11762aaa0dfab3a4190c062933bb44e8
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - audioSource: {instanceID: 0}
+  - menuClickSound: {fileID: 8300000, guid: fbb67bef374b6244fb0651a616eca190, type: 3}
+  - levelClickSound: {fileID: 8300000, guid: 4c0cc8a669f859940a397f6b2a5847d6, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

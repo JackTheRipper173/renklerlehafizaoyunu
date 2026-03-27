@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 50cbcdb6fb466674db52a7b867b5882e
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - toggleButton: {instanceID: 0}
+  - iconImage: {instanceID: 0}
+  - iconOn: {fileID: -4927191615431631973, guid: f1dbae3cb49769043b84e16f646580c6, type: 3}
+  - iconOff: {fileID: 2730177103119232129, guid: d5676bfb9b2124b4e871e04c2418adda, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
