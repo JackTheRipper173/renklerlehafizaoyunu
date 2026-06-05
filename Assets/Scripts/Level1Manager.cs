@@ -15,6 +15,7 @@ public class Level1Manager : MonoBehaviour
     public TMP_Text resultText;
     public Button retryButton;
     public Button mainMenuButton;
+    public Button nextLevelButton; // Sonraki seviye kontrolü için aktif
     public GameObject InfoPanel;
 
     [Header("Flash Settings")]
@@ -33,10 +34,49 @@ public class Level1Manager : MonoBehaviour
     {
         resultPanel.SetActive(false);
 
+        // Sahne yüklemeleri için standart dinleyiciler
         retryButton.onClick.AddListener(() => SceneManager.LoadScene("Level1"));
         mainMenuButton.onClick.AddListener(() => SceneManager.LoadScene("MainMenu"));
 
+        // --- SONRAKİ SEVİYE BUTON KONTROLÜ ---
+        if (nextLevelButton != null)
+        {
+            nextLevelButton.onClick.RemoveAllListeners(); // Eski kalıntıları temizle
+            nextLevelButton.onClick.AddListener(OnNextLevelPressed);
+            CheckNextLevelLock();
+        }
+
         UpdateUI();
+    }
+
+    // Sonraki seviyenin açık olup olmadığını denetler
+    void CheckNextLevelLock()
+    {
+        int reachedLevel = PlayerPrefs.GetInt("ReachedLevel", 1);
+        int nextLevelNumber = level + 1; // 2
+
+        // Eğer sonraki seviye halihazırda açılmışsa butonu aktif et
+        if (reachedLevel >= nextLevelNumber)
+        {
+            nextLevelButton.interactable = true;
+
+        }
+        else
+        {
+            nextLevelButton.interactable = false; // Kilitli
+
+            // Görsel olarak kilitli algısı yaratmak için şeffaflaştır
+            Color disabledColor = nextLevelButton.image.color;
+            disabledColor.a = 0.3f;
+            
+        }
+    }
+
+    // Sonraki seviye butonuna basıldığında tetiklenecek fonksiyon
+    void OnNextLevelPressed()
+    {
+        // Doğrudan Level2 sahnesini yükler
+        SceneManager.LoadScene("Level" + (level + 1));
     }
 
     public void OnStartButtonPressed()
@@ -52,7 +92,6 @@ public class Level1Manager : MonoBehaviour
         sequence.Clear();
         playerIndex = 0;
 
-        // İlk adımı ekle
         AddNewColor();
         StartCoroutine(ShowSequence());
         UpdateUI();
@@ -109,17 +148,15 @@ public class Level1Manager : MonoBehaviour
 
             if (playerIndex >= sequence.Count)
             {
-                // Eğer seviyeyi tamamlamadıysa yeni adım ekle
                 if (sequence.Count < stepsToCompleteLevel)
                 {
-                    score += 2; // her doğru adım puanı
+                    score += 2;
                     UpdateUI();
                     AddNewColor();
                     StartCoroutine(ShowSequence());
                 }
                 else
                 {
-                    // Level tamamlandı
                     score += 2;
                     UpdateUI();
                     LevelCompleted();
@@ -134,8 +171,24 @@ public class Level1Manager : MonoBehaviour
 
     void LevelCompleted()
     {
+        int reachedLevel = PlayerPrefs.GetInt("ReachedLevel", 1);
+        Debug.Log("Mevcut ReachedLevel: " + reachedLevel);
+
+        if (reachedLevel <= 1)
+        {
+            PlayerPrefs.SetInt("ReachedLevel", 2);
+            PlayerPrefs.Save();
+            Debug.Log("YENİ ReachedLevel Kaydedildi: 2");
+        }
+
+        // Seviye bittiği için artık sonraki seviye butonu aktifleşmeli
+        if (nextLevelButton != null)
+        {
+            nextLevelButton.interactable = true;
+        }
+
         resultPanel.SetActive(true);
-        resultText.text = "Tebrikler! Seviye 1 tamamlandı.";
+        resultText.text = "Mükemmel! Seviye 1 Tamamlandı.";
     }
 
     void GameOver()

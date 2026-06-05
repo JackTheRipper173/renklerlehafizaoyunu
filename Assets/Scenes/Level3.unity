@@ -1261,7 +1261,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Bu seviyede buton g\xF6sterim s\xFCresi azalacak.\nDikkat et!"
+  m_text: Renkler dahil edildi.
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1288,7 +1288,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 22.1
+  m_fontSize: 38.7
   m_fontSizeBase: 12
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -3878,6 +3878,7 @@ MonoBehaviour:
   resultText: {fileID: 1756523838}
   retryButton: {fileID: 1505081831}
   mainMenuButton: {fileID: 852232422}
+  nextLevelButton: {fileID: 130091773}
   InfoPanel: {fileID: 2140978771}
   displayImage: {fileID: 799243712}
   inputButtons:

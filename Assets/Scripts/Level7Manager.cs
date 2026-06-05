@@ -14,6 +14,7 @@ public class Level7Manager : MonoBehaviour
     public TMP_Text resultText;
     public Button retryButton;
     public Button mainMenuButton;
+    public Button nextLevelButton; // Sonraki seviye kontrolü için eklendi
     public GameObject InfoPanel;
 
     [Header("Display")]
@@ -42,7 +43,7 @@ public class Level7Manager : MonoBehaviour
     private List<Step> sequence = new List<Step>();
 
     private int playerIndex = 0;
-    private int level = 7;
+    private int level = 7; // Bu sahnenin seviyesi
     private int score = 0;
 
     private int selectedColor = -1;
@@ -54,13 +55,41 @@ public class Level7Manager : MonoBehaviour
     {
         resultPanel.SetActive(false);
 
-        retryButton.onClick.AddListener(() =>
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name));
+        retryButton.onClick.AddListener(() => SceneManager.LoadScene("Level7"));
+        mainMenuButton.onClick.AddListener(() => SceneManager.LoadScene("MainMenu"));
 
-        mainMenuButton.onClick.AddListener(() =>
-            SceneManager.LoadScene("MainMenu"));
+        // --- SONRAKİ SEVİYE BUTON KONTROLÜ ---
+        if (nextLevelButton != null)
+        {
+            nextLevelButton.onClick.RemoveAllListeners(); // Eski kalıntıları temizle
+            nextLevelButton.onClick.AddListener(OnNextLevelPressed);
+            CheckNextLevelLock(); // Sahne ilk açıldığında genel kilit durumuna göre aktif/pasif yapar
+        }
 
         UpdateUI();
+    }
+
+    // Butonun aktifliğini SADECE genel kilit durumuna bağlayan fonksiyon
+    void CheckNextLevelLock()
+    {
+        int reachedLevel = PlayerPrefs.GetInt("ReachedLevel", 1);
+        int nextLevelNumber = level + 1; // Seviye 7 için sonraki seviye 8'dir
+
+        // Eğer sonraki seviye (Level 8) halihazırda önceden açılmışsa buton aktiftir
+        if (reachedLevel >= nextLevelNumber)
+        {
+            nextLevelButton.interactable = true;
+        }
+        else
+        {
+            nextLevelButton.interactable = false; // İlk kez oynanıyorsa kilitli başlar
+        }
+    }
+
+    // Sonraki seviye butonuna basıldığında tetiklenecek fonksiyon
+    void OnNextLevelPressed()
+    {
+        SceneManager.LoadScene("Level" + (level + 1)); // Doğrudan Level8 sahnesini yükler
     }
 
     public void OnStartButtonPressed()
@@ -214,12 +243,29 @@ public class Level7Manager : MonoBehaviour
 
     void LevelCompleted()
     {
+        int reachedLevel = PlayerPrefs.GetInt("ReachedLevel", 1);
+        int currentLevelNum = 7;
+
+        if (reachedLevel <= currentLevelNum)
+        {
+            PlayerPrefs.SetInt("ReachedLevel", currentLevelNum + 1); // 8. seviyeyi açar
+            PlayerPrefs.Save();
+            Debug.Log("Tebrikler! Seviye 8 kilidi açıldı.");
+        }
+
+        // İlk kez oynanıyor olsa bile seviye tamamlandığı an buton aktif hale gelir
+        if (nextLevelButton != null)
+        {
+            nextLevelButton.interactable = true;
+        }
+
         resultPanel.SetActive(true);
-        resultText.text = "Tebrikler!";
+        resultText.text = "Tebrikler! Seviye " + currentLevelNum + " Tamamlandı.";
     }
 
     void GameOver()
     {
+        // Seviye 8 önceden açıldıysa aktif kalır, açılmadıysa pasif kalır.
         resultPanel.SetActive(true);
         resultText.text = "Oyun Bitti!";
     }

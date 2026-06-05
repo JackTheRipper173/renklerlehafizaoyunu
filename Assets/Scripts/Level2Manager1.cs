@@ -15,19 +15,20 @@ public class Level2Manager : MonoBehaviour
     public TMP_Text resultText;
     public Button retryButton;
     public Button mainMenuButton;
+    public Button nextLevelButton; // Sonraki seviye kontrolü için eklendi
     public GameObject InfoPanel;
 
     [Header("Flash Settings")]
-    public float flashDuration = 0.5f;          // Kısaltıldı (Level 1: 0.8f)
-    public float delayBetweenFlashes = 0.2f;    // Kısaltıldı (Level 1: 0.3f)
+    public float flashDuration = 0.5f;
+    public float delayBetweenFlashes = 0.2f;
 
     private List<int> sequence = new List<int>();
     private int playerIndex = 0;
-    private int level = 2;
+    private int level = 2; // Bu sahnenin seviyesi
     private int score = 0;
     private bool isShowingSequence = false;
 
-    private int stepsToCompleteLevel = 7; // Artırıldı (Level 1: 5)
+    private int stepsToCompleteLevel = 7;
 
     void Start()
     {
@@ -36,7 +37,38 @@ public class Level2Manager : MonoBehaviour
         retryButton.onClick.AddListener(() => SceneManager.LoadScene("Level2"));
         mainMenuButton.onClick.AddListener(() => SceneManager.LoadScene("MainMenu"));
 
+        // --- SONRAKİ SEVİYE BUTON KONTROLÜ ---
+        if (nextLevelButton != null)
+        {
+            nextLevelButton.onClick.RemoveAllListeners(); // Eski kalıntıları temizle
+            nextLevelButton.onClick.AddListener(OnNextLevelPressed);
+            CheckNextLevelLock(); // Sahne ilk açıldığında genel kilit durumuna göre aktif/pasif yapar
+        }
+
         UpdateUI();
+    }
+
+    // Butonun aktifliğini SADECE genel kilit durumuna bağlayan fonksiyon
+    void CheckNextLevelLock()
+    {
+        int reachedLevel = PlayerPrefs.GetInt("ReachedLevel", 1);
+        int nextLevelNumber = level + 1;
+
+        // Tek Şart: Eğer sonraki seviye halihazırda önceden açılmışsa buton aktiftir
+        if (reachedLevel >= nextLevelNumber)
+        {
+            nextLevelButton.interactable = true;
+        }
+        else
+        {
+            nextLevelButton.interactable = false; // İlk kez oynanıyorsa kilitli başlar
+        }
+    }
+
+    // Sonraki seviye butonuna basıldığında tetiklenecek fonksiyon
+    void OnNextLevelPressed()
+    {
+        SceneManager.LoadScene("Level" + (level + 1)); // Doğrudan Level3 sahnesini yükler
     }
 
     public void OnStartButtonPressed()
@@ -112,7 +144,7 @@ public class Level2Manager : MonoBehaviour
             {
                 if (sequence.Count < stepsToCompleteLevel)
                 {
-                    score += 3; // Level 2'de puan biraz daha yüksek
+                    score += 3;
                     UpdateUI();
                     AddNewColor();
                     StartCoroutine(ShowSequence());
@@ -133,12 +165,28 @@ public class Level2Manager : MonoBehaviour
 
     void LevelCompleted()
     {
+        int currentLevel = 2;
+        int reachedLevel = PlayerPrefs.GetInt("ReachedLevel", 1);
+
+        if (reachedLevel <= currentLevel)
+        {
+            PlayerPrefs.SetInt("ReachedLevel", currentLevel + 1); // ReachedLevel'ı 3 yapar
+            PlayerPrefs.Save();
+        }
+
+        // İlk kez oynanıyor olsa bile seviye tamamlandığı an buton aktif hale gelir
+        if (nextLevelButton != null)
+        {
+            nextLevelButton.interactable = true;
+        }
+
         resultPanel.SetActive(true);
         resultText.text = "Tebrikler! Seviye 2 tamamlandı.";
     }
 
     void GameOver()
     {
+        
         resultPanel.SetActive(true);
         resultText.text = "Yanlış seçim! Oyun Bitti.";
     }

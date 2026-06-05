@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class Level8Manager : MonoBehaviour
+public class Level9Manager : MonoBehaviour
 {
     [Header("UI")]
     public TMP_Text scoreText;
@@ -18,8 +18,9 @@ public class Level8Manager : MonoBehaviour
     public GameObject InfoPanel;
 
     [Header("Display")]
-    public Image displayImage;
-    public Image displayShape;
+    public Image displayImage; // Gerçek renk kutusu
+    public Image displayShape; // Gerçek şekil kutusu
+    public Image fakeDisplayImage; // Yanıltıcı renk kutusu
 
     [Header("Buttons")]
     public Button[] colorButtons;
@@ -43,7 +44,7 @@ public class Level8Manager : MonoBehaviour
     private List<Step> sequence = new List<Step>();
 
     private int playerIndex = 0;
-    private int level = 8; // Bu sahnenin seviyesi
+    private int level = 9; // Bu sahnenin seviyesi
     private int score = 0;
 
     private int selectedColor = -1;
@@ -55,7 +56,7 @@ public class Level8Manager : MonoBehaviour
     {
         resultPanel.SetActive(false);
 
-        retryButton.onClick.AddListener(() => SceneManager.LoadScene("Level8"));
+        retryButton.onClick.AddListener(() => SceneManager.LoadScene("Level9"));
         mainMenuButton.onClick.AddListener(() => SceneManager.LoadScene("MainMenu"));
 
         // --- SONRAKİ SEVİYE BUTON KONTROLÜ ---
@@ -73,9 +74,9 @@ public class Level8Manager : MonoBehaviour
     void CheckNextLevelLock()
     {
         int reachedLevel = PlayerPrefs.GetInt("ReachedLevel", 1);
-        int nextLevelNumber = level + 1; // Seviye 8 için sonraki seviye 9'dur
+        int nextLevelNumber = level + 1; // Seviye 9 için sonraki seviye 10'dur
 
-        // Eğer sonraki seviye (Level 9) halihazırda önceden açılmışsa buton aktiftir
+        // Eğer sonraki seviye (Level 10) halihazırda önceden açılmışsa buton aktiftir
         if (reachedLevel >= nextLevelNumber)
         {
             nextLevelButton.interactable = true;
@@ -89,7 +90,7 @@ public class Level8Manager : MonoBehaviour
     // Sonraki seviye butonuna basıldığında tetiklenecek fonksiyon
     void OnNextLevelPressed()
     {
-        SceneManager.LoadScene("Level" + (level + 1)); // Doğrudan Level9 sahnesini yükler
+        SceneManager.LoadScene("Level" + (level + 1)); // Doğrudan Level10 sahnesini yükler
     }
 
     public void OnStartButtonPressed()
@@ -111,9 +112,7 @@ public class Level8Manager : MonoBehaviour
         sequence.Clear();
 
         AddNewStep();
-
         StartCoroutine(ShowSequence());
-
         UpdateUI();
     }
 
@@ -148,18 +147,27 @@ public class Level8Manager : MonoBehaviour
 
     IEnumerator Flash(Step step)
     {
+        // 1. Gerçek Renk Kutusunu Yak
         if (displayImage != null && step.color < colors.Length)
         {
             Color c = colors[step.color];
             c.a = 1f;
             displayImage.color = c;
-            displayImage.gameObject.SetActive(true);
         }
 
+        // 2. Gerçek Şekil Kutusunu Yak
         if (displayShape != null && step.shape < shapes.Length)
         {
             displayShape.sprite = shapes[step.shape];
-            displayShape.gameObject.SetActive(true);
+        }
+
+        // 3. Yanıltıcı (Fake) Renk Kutusunu Yak
+        if (fakeDisplayImage != null)
+        {
+            int fakeColorIndex = Random.Range(0, colors.Length);
+            Color fc = colors[fakeColorIndex];
+            fc.a = 1f;
+            fakeDisplayImage.color = fc;
         }
 
         yield return new WaitForSeconds(flashDuration);
@@ -171,20 +179,17 @@ public class Level8Manager : MonoBehaviour
 
     void ResetDisplay()
     {
-        if (displayImage != null)
-        {
-            displayImage.color = new Color(0.2f, 0.2f, 0.2f, 1f);
-        }
-        if (displayShape != null)
-        {
-            displayShape.sprite = null;
-        }
+        Color neutral = new Color(0.2f, 0.2f, 0.2f, 1f);
+
+        if (displayImage != null) displayImage.color = neutral;
+        if (fakeDisplayImage != null) fakeDisplayImage.color = neutral;
+
+        if (displayShape != null) displayShape.sprite = null;
     }
 
     public void OnColorPressed(int index)
     {
         if (isShowingSequence) return;
-
         selectedColor = index;
         CheckInput();
     }
@@ -192,7 +197,6 @@ public class Level8Manager : MonoBehaviour
     public void OnShapePressed(int index)
     {
         if (isShowingSequence) return;
-
         selectedShape = index;
         CheckInput();
     }
@@ -212,10 +216,10 @@ public class Level8Manager : MonoBehaviour
 
             if (playerIndex >= sequence.Count)
             {
-                score += 8;
+                score += 9;
                 UpdateUI();
 
-                if (sequence.Count < 4)
+                if (sequence.Count < 5)
                 {
                     AddNewStep();
                     StartCoroutine(ShowSequence());
@@ -234,40 +238,37 @@ public class Level8Manager : MonoBehaviour
 
     void SetButtonsInteractable(bool state)
     {
-        foreach (Button btn in colorButtons)
-            btn.interactable = state;
-
-        foreach (Button btn in shapeButtons)
-            btn.interactable = state;
+        foreach (Button btn in colorButtons) btn.interactable = state;
+        foreach (Button btn in shapeButtons) btn.interactable = state;
     }
 
     void LevelCompleted()
     {
         int reachedLevel = PlayerPrefs.GetInt("ReachedLevel", 1);
-        int currentLevelNum = 8;
+        int currentLevelNum = 9;
 
         if (reachedLevel <= currentLevelNum)
         {
-            PlayerPrefs.SetInt("ReachedLevel", currentLevelNum + 1); // Seviye 9 kilidini açar
+            PlayerPrefs.SetInt("ReachedLevel", currentLevelNum + 1); // Seviye 10 kilidini açar
             PlayerPrefs.Save();
-            Debug.Log("Sistem: Seviye 9 kilidi başarıyla açıldı ve kaydedildi.");
+            Debug.Log("Sistem: Seviye 10 kilidi başarıyla açıldı ve kaydedildi.");
         }
 
-        // Seviye ilk kez bitiriliyor olsa bile buton panelle birlikte anında aktifleşir
+        // İlk kez bitiriliyor olsa bile buton panelle birlikte anında aktifleşir
         if (nextLevelButton != null)
         {
             nextLevelButton.interactable = true;
         }
 
         resultPanel.SetActive(true);
-        resultText.text = "Tebrikler! Seviye " + currentLevelNum + " Tamamlandı.";
+        resultText.text = "Mükemmel! Seviye " + currentLevelNum + " Tamamlandı.";
     }
 
     void GameOver()
     {
-        // Seviye 9 önceden açıldıysa aktif kalır, açılmadıysa pasif kalır.
+        // Seviye 10 önceden açıldıysa aktif kalır, açılmadıysa pasif kalır.
         resultPanel.SetActive(true);
-        resultText.text = "Oyun Bitti!";
+        resultText.text = "Yanlış Seçim! Oyun Bitti.";
     }
 
     void UpdateUI()

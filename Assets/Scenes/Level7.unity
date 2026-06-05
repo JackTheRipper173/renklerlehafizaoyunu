@@ -4519,6 +4519,7 @@ MonoBehaviour:
   resultText: {fileID: 1756523838}
   retryButton: {fileID: 1505081831}
   mainMenuButton: {fileID: 852232422}
+  nextLevelButton: {fileID: 130091773}
   InfoPanel: {fileID: 2140978771}
   displayImage: {fileID: 799243712}
   displayShape: {fileID: 300518356}

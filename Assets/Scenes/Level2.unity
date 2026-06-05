@@ -3917,6 +3917,7 @@ MonoBehaviour:
   resultText: {fileID: 1756523838}
   retryButton: {fileID: 1505081831}
   mainMenuButton: {fileID: 852232422}
+  nextLevelButton: {fileID: 130091773}
   InfoPanel: {fileID: 2140978771}
   flashDuration: 0.5
   delayBetweenFlashes: 0.2

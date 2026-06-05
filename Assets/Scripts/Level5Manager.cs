@@ -14,6 +14,7 @@ public class Level5Manager : MonoBehaviour
     public TMP_Text resultText;
     public Button retryButton;
     public Button mainMenuButton;
+    public Button nextLevelButton; // Sonraki seviye kontrolü için eklendi
     public GameObject InfoPanel;
 
     [Header("Görsel Gösterge")]
@@ -29,7 +30,7 @@ public class Level5Manager : MonoBehaviour
 
     private List<int> sequence = new List<int>();
     private int playerIndex = 0;
-    private int level = 5;
+    private int level = 5; // Bu sahnenin seviyesi
     private int score = 0;
     private bool isShowingSequence = false;
     private Color originalDisplayColor;
@@ -41,10 +42,41 @@ public class Level5Manager : MonoBehaviour
         if (displayImage != null)
             originalDisplayColor = displayImage.color;
 
-        retryButton.onClick.AddListener(() => SceneManager.LoadScene(SceneManager.GetActiveScene().name));
+        retryButton.onClick.AddListener(() => SceneManager.LoadScene("Level5"));
         mainMenuButton.onClick.AddListener(() => SceneManager.LoadScene("MainMenu"));
 
+        // --- SONRAKİ SEVİYE BUTON KONTROLÜ ---
+        if (nextLevelButton != null)
+        {
+            nextLevelButton.onClick.RemoveAllListeners(); // Eski kalıntıları temizle
+            nextLevelButton.onClick.AddListener(OnNextLevelPressed);
+            CheckNextLevelLock(); // Sahne ilk açıldığında genel kilit durumuna göre aktif/pasif yapar
+        }
+
         UpdateUI();
+    }
+
+    // Butonun aktifliğini SADECE genel kilit durumuna bağlayan fonksiyon
+    void CheckNextLevelLock()
+    {
+        int reachedLevel = PlayerPrefs.GetInt("ReachedLevel", 1);
+        int nextLevelNumber = level + 1; // Seviye 5 için sonraki seviye 6'dır
+
+        // Eğer sonraki seviye (Level 6) halihazırda önceden açılmışsa buton aktiftir
+        if (reachedLevel >= nextLevelNumber)
+        {
+            nextLevelButton.interactable = true;
+        }
+        else
+        {
+            nextLevelButton.interactable = false; // İlk kez oynanıyorsa kilitli başlar
+        }
+    }
+
+    // Sonraki seviye butonuna basıldığında tetiklenecek fonksiyon
+    void OnNextLevelPressed()
+    {
+        SceneManager.LoadScene("Level" + (level + 1)); // Doğrudan Level6 sahnesini yükler
     }
 
     public void OnStartButtonPressed()
@@ -111,16 +143,17 @@ public class Level5Manager : MonoBehaviour
 
             if (playerIndex >= sequence.Count)
             {
-                score += 6;
-                UpdateUI();
-
                 if (sequence.Count < 10)   // Maksimum sekans
                 {
+                    score += 6;
+                    UpdateUI();
                     AddNewColor();
                     StartCoroutine(ShowSequence());
                 }
                 else
                 {
+                    score += 6;
+                    UpdateUI();
                     LevelCompleted();
                 }
             }
@@ -139,15 +172,33 @@ public class Level5Manager : MonoBehaviour
 
     void LevelCompleted()
     {
+        int reachedLevel = PlayerPrefs.GetInt("ReachedLevel", 1);
+        int currentLevelNum = 5;
+
+        if (reachedLevel <= currentLevelNum)
+        {
+            PlayerPrefs.SetInt("ReachedLevel", currentLevelNum + 1); // ReachedLevel'ı 6 yapar
+            PlayerPrefs.Save();
+            Debug.Log("Kilit Açıldı! Yeni Ulaşılan Seviye: " + (currentLevelNum + 1));
+        }
+
+        // Seviye ilk kez tamamlanıyor olsa bile buton panelle birlikte anında aktifleşir
+        if (nextLevelButton != null)
+        {
+            nextLevelButton.interactable = true;
+        }
+
         resultPanel.SetActive(true);
-        resultText.text = "Tebrikler!";
+        resultText.text = "Mükemmel! Seviye " + currentLevelNum + " Tamamlandı.";
     }
 
     void GameOver()
     {
+        // Butonun durumuna dokunulmuyor. Seviye 6 önceden açıldıysa aktif kalır, açılmadıysa pasif kalır.
         resultPanel.SetActive(true);
         resultText.text = "Oyun Bitti!";
     }
+
     public void HideOption(int index)
     {
         if (index >= 0 && index < inputButtons.Length)
@@ -155,6 +206,7 @@ public class Level5Manager : MonoBehaviour
             inputButtons[index].gameObject.SetActive(false);
         }
     }
+
     public void RevealOption(int index)
     {
         if (index >= 0 && index < inputButtons.Length)
@@ -162,6 +214,7 @@ public class Level5Manager : MonoBehaviour
             inputButtons[index].gameObject.SetActive(true);
         }
     }
+
     void UpdateUI()
     {
         scoreText.text = "Puan: " + score;
